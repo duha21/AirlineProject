@@ -1,91 +1,153 @@
-import java.util.*;
+package flightmanagement;
+
+import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class FlightManagement {
+    private List<Flight> flights;
 
-    static class Flight {
-        String flightNumber;
-        String departure;
-        String destination;
-        String status; // to see whether the flights are scheduled, delayed or cancelled
-        double distance;
-        double duration;
-
-        public Flight(String flightNumber, String departure, String destination, String status, double distance, double duration) {
-            this.flightNumber = flightNumber;
-            this.departure = departure;
-            this.destination = destination;
-            this.status = status;
-            this.distance = distance;
-            this.duration = duration;
-        }
-
-        @Override
-        public String toString() {
-            return "Flight Number: " + flightNumber + ", Status: " + status + ", From: " + departure + ", To: " + destination + ", Distance: " + distance + " km, Duration: " + duration + " hours.";
-        }
+    public FlightManagement() {
+        flights = new ArrayList<>();
+        loadFlights();
     }
 
-    private final List<Flight> flights = new ArrayList<>();
-    private final FlightPath.Graph flightGraph = new FlightPath.Graph();
-
-    // this is how we can add a flight to the system
-    public void addFlight(String flightNumber, String departure, String destination, double distance, double duration) {
-        flightGraph.addcountry(departure);
-        flightGraph.addcountry(destination);
-        flightGraph.addFlight(departure, destination, (int) distance);
-
-        flights.add(new Flight(flightNumber, departure, destination, "Scheduled", distance, duration));
-    }
-
-    public void viewFlights() {
-        if (flights.isEmpty()) {
-            System.out.println("No flights available.");
-            return;
-        }
+    // Passenger management to add view and remove passengers from a flight
+    public void addPassenger(String flightNumber, String passengerName) {
         for (Flight flight : flights) {
-            System.out.println(flight);
-        }
-    }
-
-    // Update the status of a flight
-    public void updateFlightStatus(String flightNumber, String newStatus) {
-        for (Flight flight : flights) {
-            if (flight.flightNumber.equals(flightNumber)) {
-                flight.status = newStatus;
-                System.out.println("Flight " + flightNumber + " updated to " + newStatus);
+            if (flight.getFlightNumber().equals(flightNumber)) {
+                if (flight.addPassenger(passengerName)) {
+                    System.out.println("Passenger added to flight " + flightNumber);
+                } else {
+                    System.out.println("Flight is full.");
+                }
                 return;
             }
         }
-        System.out.println("Flight not found.");
+        System.out.println("Flight not found: " + flightNumber);
     }
 
-    public void calculateShortestPath(String departure, String destination) {
-        List<String> path = flightGraph.getShortestPath(departure, destination);
-        if (path.isEmpty()) {
-            System.out.println("No path found between " + departure + " and " + destination + ".");
-        } else {
-            System.out.println("Shortest path: " + String.join(" -> ", path));
+    public void removePassenger(String flightNumber, String passengerName) {
+        for (Flight flight : flights) {
+            if (flight.getFlightNumber().equals(flightNumber)) {
+                if (flight.removePassenger(passengerName)) {
+                    System.out.println("Passenger removed from flight " + flightNumber);
+                } else {
+                    System.out.println("Passenger not found.");
+                }
+                return;
+            }
+        }
+        System.out.println("Flight not found: " + flightNumber);
+    }
+
+    public void viewPassengers(String flightNumber) {
+        for (Flight flight : flights) {
+            if (flight.getFlightNumber().equals(flightNumber)) {
+                System.out.println("Passengers on flight " + flightNumber + ": " + flight.getPassengers());
+                return;
+            }
+        }
+        System.out.println("Flight not found: " + flightNumber);
+    }
+
+    // Search and filter through different flights
+    public void searchFlights(String origin, String destination, String startDate, String endDate) {
+        for (Flight flight : flights) {
+            boolean matchesOrigin = origin == null || flight.getOrigin().equalsIgnoreCase(origin);
+            boolean matchesDestination = destination == null || flight.getDestination().equalsIgnoreCase(destination);
+            boolean matchesDateRange = (startDate == null || flight.getDate().compareTo(startDate) >= 0) &&
+                    (endDate == null || flight.getDate().compareTo(endDate) <= 0);
+
+            if (matchesOrigin && matchesDestination && matchesDateRange) {
+                System.out.println(flight);
+            }
         }
     }
 
-    public static void main(String[] args) {
-        FlightManagement management = new FlightManagement();
+    // Real-time status updates on incoming flights and flights that are ready for departure
+    public void startStatusUpdates() {
+        Timer timer = new Timer();
+        timer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                Random random = new Random();
+                for (Flight flight : flights) {
+                    int chance = random.nextInt(100);
+                    if (chance < 10) {
+                        flight.setStatus("Delayed");
+                    } else if (chance < 5) {
+                        flight.setStatus("Cancelled");
+                    } else {
+                        flight.setStatus("Scheduled");
+                    }
+                }
+                System.out.println("Flight statuses updated.");
+            }
+        }, 0, 60000); // this will update every minute
+    }
 
-        // these are example flights
-        management.addFlight("F001", "Japan", "USA", 10000, 12);
-        management.addFlight("F002", "Germany", "France", 500, 1.5);
+    // Add a new flight
+    public void addFlight(String flightNumber, String origin, String destination, String date, String time, int capacity) {
+        Flight newFlight = new Flight(flightNumber, origin, destination, date, time, capacity);
+        flights.add(newFlight);
+        saveFlights();
+        System.out.println("Flight added successfully: " + newFlight);
+    }
 
-        // this is how we are able to view the flights that are avaliable
-        System.out.println("Available Flights:");
-        management.viewFlights();
+    // Update an existing flight
+    public void updateFlight(String flightNumber, String newOrigin, String newDestination, String newDate, String newTime, int newCapacity) {
+        for (Flight flight : flights) {
+            if (flight.getFlightNumber().equals(flightNumber)) {
+                flight.setOrigin(newOrigin);
+                flight.setDestination(newDestination);
+                flight.setDate(newDate);
+                flight.setTime(newTime);
+                flight.setCapacity(newCapacity);
+                saveFlights();
+                System.out.println("Flight updated successfully: " + flight);
+                return;
+            }
+        }
+        System.out.println("Flight not found: " + flightNumber);
+    }
 
-        // additional features to calculate shortest paths, utilising the weather impact and to view fligth status
-        management.updateFlightStatus("F001", "Delayed");
+    // Delete a flight
+    public void deleteFlight(String flightNumber) {
+        flights.removeIf(flight -> flight.getFlightNumber().equals(flightNumber));
+        saveFlights();
+        System.out.println("Flight deleted successfully: " + flightNumber);
+    }
 
-        System.out.println("\nCalculating Shortest Path:");
-        management.calculateShortestPath("Japan", "France");
+    // View flights based on a filter
+    public void viewFlights(String filterBy, String filterValue) {
+        for (Flight flight : flights) {
+            if ((filterBy.equalsIgnoreCase("origin") && flight.getOrigin().equalsIgnoreCase(filterValue)) ||
+                    (filterBy.equalsIgnoreCase("destination") && flight.getDestination().equalsIgnoreCase(filterValue)) ||
+                    (filterBy.equalsIgnoreCase("date") && flight.getDate().equalsIgnoreCase(filterValue))) {
+                System.out.println(flight);
+            }
+        }
+    }
 
-        System.out.println("\nCalculating Weather Impact:");
-        management.calculateWeatherImpact("F001", 60, 15, "no");
+    // Save flights to a file
+    private void saveFlights() {
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("flights.ser"))) {
+            oos.writeObject(flights);
+        } catch (IOException e) {
+            System.out.println("Error saving flights: " + e.getMessage());
+        }
+    }
+
+    // Load flights from a file
+    @SuppressWarnings("unchecked")
+    private void loadFlights() {
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream("flights.ser"))) {
+            flights = (List<Flight>) ois.readObject();
+        } catch (FileNotFoundException e) {
+            System.out.println("No saved flights found. Starting fresh.");
+        } catch (IOException | ClassNotFoundException e) {
+            System.out.println("Error loading flights: " + e.getMessage());
+        }
     }
 }
