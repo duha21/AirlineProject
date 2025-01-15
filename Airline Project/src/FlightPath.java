@@ -19,8 +19,8 @@ class FlightPath {
         }
 
         void addFlight(String fromcountry, String tocountry, int distance) {
-        	adjacencyList.putIfAbsent(fromcountry, new ArrayList<>());
-            adjacencyList.putIfAbsent(tocountry, new ArrayList<>());   
+            adjacencyList.putIfAbsent(fromcountry, new ArrayList<>());
+            adjacencyList.putIfAbsent(tocountry, new ArrayList<>());
             adjacencyList.get(fromcountry).add(new Edge(tocountry, distance));
             adjacencyList.get(tocountry).add(new Edge(fromcountry, distance));
         }
@@ -29,7 +29,7 @@ class FlightPath {
             Map<String, Integer> distances = new HashMap<>();
             Map<String, String> previouscountries = new HashMap<>();
             PriorityQueue<String> priorityQueue = new PriorityQueue<>(Comparator.comparingInt(distances::get));
-            
+
             for (String country : adjacencyList.keySet()) {
                 distances.put(country, Integer.MAX_VALUE);
             }
@@ -145,13 +145,84 @@ class FlightPath {
 
         // Input for the shortest path
         Scanner scanner = new Scanner(System.in);
-        System.out.print("Enter the starting country: ");
-        String startcountry = scanner.nextLine();
-        System.out.print("Enter the target country: ");
-        String targetcountry = scanner.nextLine();
+        try {
+            // Gets input for starting country
+            System.out.print("Enter the starting country: ");
+            String startcountry = scanner.nextLine();
+            if (!graph.adjacencyList.containsKey(startcountry)) {
+                throw new IllegalArgumentException("Starting country not listed.");
+            }
 
-        // Find and display the shortest path
-        graph.getShortestPath(startcountry, targetcountry);
-        scanner.close();
+            // Get nput for target country
+            System.out.print("Enter the target country: ");
+            String targetcountry = scanner.nextLine();
+            if (!graph.adjacencyList.containsKey(targetcountry)) {
+                throw new IllegalArgumentException("Target country not listed.");
+            }
+
+            // Gets input for layovers
+            System.out.print("Are layovers expected? (yes/no): ");
+            String layovers = scanner.nextLine();
+
+            // Find and display the shortest path
+            List<String> path = graph.getShortestPath(startcountry, targetcountry);
+            int totalDistance = 0;
+            for (int i = 0; i < path.size() - 1; i++) {
+                for (Edge edge : graph.adjacencyList.get(path.get(i))) {
+                    if (edge.targetcountry.equals(path.get(i + 1))) {
+                        totalDistance += edge.distance;
+                        break;
+                    }
+                }
+            }
+
+            // Gets wind 
+            System.out.print("Enter the wind speed (in km/h): ");
+            int windSpeed = scanner.nextInt();
+            scanner.nextLine(); // Consume newline
+
+            // Get user input for wind type
+            System.out.print("Is it a crosswind or tailwind? (crosswind/tailwind): ");
+            String windType = scanner.nextLine();
+
+           
+            System.out.print("Enter the snow level at departure (in cm): ");
+            int snowLevelDeparture = scanner.nextInt();
+            System.out.print("Enter the snow level at destination (in cm): ");
+            int snowLevelDestination = scanner.nextInt();
+
+            int layoverSnowLevel = 0;
+            if (layovers.equalsIgnoreCase("yes")) {
+                System.out.print("Enter the snow level at layover (in cm): ");
+                layoverSnowLevel = scanner.nextInt();
+            }
+
+            double bestCaseSpeed = 926.0;
+            double worstCaseSpeed = 880.0;
+            double flightTime = totalDistance / bestCaseSpeed;
+
+           
+            if (snowLevelDeparture > 30 || snowLevelDestination > 30 || layoverSnowLevel > 30) {
+                System.out.println("Flight cancelled due to heavy snowfall.");
+            } else {
+                // Calculate snow impact on flight time
+                double snowImpact = (snowLevelDeparture + snowLevelDestination + layoverSnowLevel) / 10.0;
+                flightTime += Math.min(snowImpact, 6.0);
+
+                // Check for wind conditions and calculate additional landing attempts
+                if ((windType.equalsIgnoreCase("crosswind") && windSpeed > 65) || (windType.equalsIgnoreCase("tailwind") && windSpeed > 16)) {
+                    Random random = new Random();
+                    int attempts = random.nextInt(3) + 1;
+                    flightTime += attempts * 0.5;
+                    System.out.println("Multiple landing attempts due to wind conditions: " + attempts + " attempts.");
+                }
+
+                System.out.println("Estimated flight time: " + flightTime + " hours.");
+            }
+        } catch (IllegalArgumentException e) {
+            System.out.println(e.getMessage());
+        } finally {
+            scanner.close();
+        }
     }
 }
