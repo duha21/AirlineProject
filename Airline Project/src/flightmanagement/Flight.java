@@ -1,69 +1,82 @@
-package com.flightmanagement;
+package flightmanagement;
 
-public class Flight {
+import java.io.Serializable;
+
+public class Flight implements Serializable {
     private String flightNumber;
-    private String departureLocation;
-    private String arrivalLocation;
-    private String departureTime;
-    private String arrivalTime;
+    private String origin;
+    private String destination;
+    private String date;
+    private String time;
     private int capacity;
-    private int seatsBooked;
 
-    public Flight(String flightNumber, String departureLocation, String arrivalLocation,
-                  String departureTime, String arrivalTime, int capacity) {
+    public Flight(String flightNumber, String origin, String destination, String date, String time, int capacity) {
         this.flightNumber = flightNumber;
-        this.departureLocation = departureLocation;
-        this.arrivalLocation = arrivalLocation;
-        this.departureTime = departureTime;
-        this.arrivalTime = arrivalTime;
+        this.origin = origin;
+        this.destination = destination;
+        this.date = date;
+        this.time = time;
         this.capacity = capacity;
-        this.seatsBooked = 0;
     }
 
+    // Getters and Setters
     public String getFlightNumber() {
         return flightNumber;
     }
 
-    public String getDepartureLocation() {
-        return departureLocation;
+    public void setFlightNumber(String flightNumber) {
+        this.flightNumber = flightNumber;
     }
 
-    public String getArrivalLocation() {
-        return arrivalLocation;
+    public String getOrigin() {
+        return origin;
     }
 
-    public String getDepartureTime() {
-        return departureTime;
+    public void setOrigin(String origin) {
+        this.origin = origin;
     }
 
-    public String getArrivalTime() {
-        return arrivalTime;
+    public String getDestination() {
+        return destination;
+    }
+
+    public void setDestination(String destination) {
+        this.destination = destination;
+    }
+
+    public String getDate() {
+        return date;
+    }
+
+    public void setDate(String date) {
+        this.date = date;
+    }
+
+    public String getTime() {
+        return time;
+    }
+
+    public void setTime(String time) {
+        this.time = time;
     }
 
     public int getCapacity() {
         return capacity;
     }
 
-    public int getSeatsBooked() {
-        return seatsBooked;
-    }
-
-    public boolean bookSeat() {
-        if (seatsBooked < capacity) {
-            seatsBooked++;
-            return true;
-        }
-        return false;
+    public void setCapacity(int capacity) {
+        this.capacity = capacity;
     }
 
     @Override
     public String toString() {
-        return "Flight " + flightNumber + " from " + departureLocation + " to " + arrivalLocation +
-                " departs at " + departureTime + " and arrives at " + arrivalTime +
-                ". Capacity: " + capacity + ", Seats Booked: " + seatsBooked;
+        return "Flight{" +
+                "flightNumber='" + flightNumber + '\'' +
+                ", origin='" + origin + '\'' +
+                ", destination='" + destination + '\'' +
+                ", date='" + date + '\'' +
+                ", time='" + time + '\'' +
+                ", capacity=" + capacity +
+                '}';
     }
 }
-
-
-
-
