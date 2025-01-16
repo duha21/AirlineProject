@@ -13,7 +13,7 @@ public class FlightPathTest {
         graph.addcountry("C");
         graph.addFlight("A", "B", 5);
         graph.addFlight("B", "C", 10);
-        graph.addFlight("A", "C", 15);
+        graph.addFlight("A", "C", 17);
 
         List<String> path = graph.getShortestPath("A", "C");
         assertEquals(List.of("A", "B", "C"), path);
