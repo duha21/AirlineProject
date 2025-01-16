@@ -185,5 +185,51 @@ public class FlightJourneyTest {
         calculator.calculateFlightTime();
         calculator.displayFlightTime();
     }
+
+    private static void testCase9() {
+        long startTime = System.currentTimeMillis();
+        long endTime = startTime + 10000; // 10 seconds. A test to run multiple test cases in a loop 
+
+        int maxRouteLength = 5000;
+        int maxRain = 50;
+        int maxSnow = 30;
+        int maxWind = 30;
+        int maxCrossWind = 20;
+        float maxTurbulence = 1.0f;
+        int maxLayovers = 6;
+
+        for (int routeLength = 0; routeLength <= maxRouteLength && System.currentTimeMillis() < endTime; routeLength += 500) {
+            for (int rain = 0; rain <= maxRain && System.currentTimeMillis() < endTime; rain += 10) {
+                for (int snow = 0; snow <= maxSnow && System.currentTimeMillis() < endTime; snow += 5) {
+                    for (int wind = 0; wind <= maxWind && System.currentTimeMillis() < endTime; wind += 5) {
+                        for (int crossWind = 0; crossWind <= maxCrossWind && System.currentTimeMillis() < endTime; crossWind += 5) {
+                            for (float turbulence = 0; turbulence <= maxTurbulence && System.currentTimeMillis() < endTime; turbulence += 0.2f) {
+                                for (int layovers = 0; layovers <= maxLayovers && System.currentTimeMillis() < endTime; layovers++) {
+                                    FlightJourney journey = new FlightJourney();
+                                    journey.routeLength = routeLength;
+                                    journey.rainDeparture = rain;
+                                    journey.rainDestination = rain;
+                                    journey.snowDeparture = snow;
+                                    journey.snowDestination = snow;
+                                    journey.tailWindDeparture = wind;
+                                    journey.tailWindDestination = wind;
+                                    journey.crossWindDeparture = crossWind;
+                                    journey.crossWindDestination = crossWind;
+                                    journey.turbulenceDeparture = turbulence;
+                                    journey.turbulenceDestination = turbulence;
+                                    journey.layovers = layovers > 0;
+                                    journey.numberOfLayovers = layovers;
+
+                                    FlightTimeCalculator calculator = new FlightTimeCalculator(journey);
+                                    calculator.calculateFlightTime();
+                                    calculator.displayFlightTime();
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
