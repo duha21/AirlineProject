@@ -1,78 +1,43 @@
 package flightmanagement;
 
-import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
+public class FlightManagementTest {
+    public static void main(String[] args) {
+        FlightManagement flightManagement = new FlightManagement();
 
-public class FlightManagement {
-    private List<Flight> flights;
+        // Test 1: Add flights
+        System.out.println("\nAdding flights:");
+        flightManagement.addFlight("FL123", "New York", "London", "2025-01-20", "10:00 AM", 150);
+        flightManagement.addFlight("FL456", "Paris", "Tokyo", "2025-02-15", "11:30 PM", 200);
 
-    public FlightManagement() {
-        flights = new ArrayList<>();
-        loadFlights();
-    }
+        // Test 2: View flights
+        System.out.println("\nViewing flights:");
+        flightManagement.viewFlights("origin", "New York");
 
-    // Add a new flight
-    public void addFlight(String flightNumber, String origin, String destination, String date, String time, int capacity) {
-        Flight newFlight = new Flight(flightNumber, origin, destination, date, time, capacity);
-        flights.add(newFlight);
-        saveFlights();
-        System.out.println("Flight added successfully: " + newFlight);
-    }
+        // Test 3: Add passengers
+        System.out.println("\nAdding passengers:");
+        flightManagement.addPassenger("FL123", "John Doe");
+        flightManagement.addPassenger("FL123", "Jane Doe");
+        flightManagement.viewPassengers("FL123");
 
-    // Update an existing flight
-    public void updateFlight(String flightNumber, String newOrigin, String newDestination, String newDate, String newTime, int newCapacity) {
-        for (Flight flight : flights) {
-            if (flight.getFlightNumber().equals(flightNumber)) {
-                flight.setOrigin(newOrigin);
-                flight.setDestination(newDestination);
-                flight.setDate(newDate);
-                flight.setTime(newTime);
-                flight.setCapacity(newCapacity);
-                saveFlights();
-                System.out.println("Flight updated successfully: " + flight);
-                return;
-            }
-        }
-        System.out.println("Flight not found: " + flightNumber);
-    }
+        // Test 4: Remove a passenger
+        System.out.println("\nRemoving a passenger:");
+        flightManagement.removePassenger("FL123", "John Doe");
+        flightManagement.viewPassengers("FL123");
 
-    // Delete a flight
-    public void deleteFlight(String flightNumber) {
-        flights.removeIf(flight -> flight.getFlightNumber().equals(flightNumber));
-        saveFlights();
-        System.out.println("Flight deleted successfully: " + flightNumber);
-    }
+        // Test 5: Update a flight
+        System.out.println("\nUpdating flight FL123:");
+        flightManagement.updateFlight("FL123", "New York", "Berlin", "2025-01-22", "2:00 PM", 200);
 
-    // View flights based on a filter
-    public void viewFlights(String filterBy, String filterValue) {
-        for (Flight flight : flights) {
-            if ((filterBy.equalsIgnoreCase("origin") && flight.getOrigin().equalsIgnoreCase(filterValue)) ||
-                    (filterBy.equalsIgnoreCase("destination") && flight.getDestination().equalsIgnoreCase(filterValue)) ||
-                    (filterBy.equalsIgnoreCase("date") && flight.getDate().equalsIgnoreCase(filterValue))) {
-                System.out.println(flight);
-            }
-        }
-    }
+        // Test 6: View updated flights
+        System.out.println("\nViewing updated flights:");
+        flightManagement.viewFlights("origin", "New York");
 
-    // Save flights to a file
-    private void saveFlights() {
-        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("flights.ser"))) {
-            oos.writeObject(flights);
-        } catch (IOException e) {
-            System.out.println("Error saving flights: " + e.getMessage());
-        }
-    }
+        // Test 7: Delete a flight
+        System.out.println("\nDeleting flight FL123:");
+        flightManagement.deleteFlight("FL123");
 
-    // Load flights from a file
-    @SuppressWarnings("unchecked")
-    private void loadFlights() {
-        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream("flights.ser"))) {
-            flights = (List<Flight>) ois.readObject();
-        } catch (FileNotFoundException e) {
-            System.out.println("No saved flights found. Starting fresh.");
-        } catch (IOException | ClassNotFoundException e) {
-            System.out.println("Error loading flights: " + e.getMessage());
-        }
+        // Test 8: View flights after deletion
+        System.out.println("\nViewing flights after deletion:");
+        flightManagement.viewFlights("origin", "");
     }
 }

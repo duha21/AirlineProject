@@ -3,6 +3,9 @@ package flightmanagement;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class FlightManagement {
     private List<Flight> flights;
@@ -10,6 +13,81 @@ public class FlightManagement {
     public FlightManagement() {
         flights = new ArrayList<>();
         loadFlights();
+    }
+
+    // Passenger management to add, view, and remove passengers from a flight
+    public void addPassenger(String flightNumber, String passengerName) {
+        for (Flight flight : flights) {
+            if (flight.getFlightNumber().equals(flightNumber)) {
+                if (flight.addPassenger(passengerName)) {
+                    System.out.println("Passenger added to flight " + flightNumber);
+                } else {
+                    System.out.println("Flight is full.");
+                }
+                return;
+            }
+        }
+        System.out.println("Flight not found: " + flightNumber);
+    }
+
+    public void removePassenger(String flightNumber, String passengerName) {
+        for (Flight flight : flights) {
+            if (flight.getFlightNumber().equals(flightNumber)) {
+                if (flight.removePassenger(passengerName)) {
+                    System.out.println("Passenger removed from flight " + flightNumber);
+                } else {
+                    System.out.println("Passenger not found.");
+                }
+                return;
+            }
+        }
+        System.out.println("Flight not found: " + flightNumber);
+    }
+
+    public void viewPassengers(String flightNumber) {
+        for (Flight flight : flights) {
+            if (flight.getFlightNumber().equals(flightNumber)) {
+                System.out.println("Passengers on flight " + flightNumber + ": " + flight.getPassengers());
+                return;
+            }
+        }
+        System.out.println("Flight not found: " + flightNumber);
+    }
+
+    // Search and filter through different flights
+    public void searchFlights(String origin, String destination, String startDate, String endDate) {
+        for (Flight flight : flights) {
+            boolean matchesOrigin = origin == null || flight.getOrigin().equalsIgnoreCase(origin);
+            boolean matchesDestination = destination == null || flight.getDestination().equalsIgnoreCase(destination);
+            boolean matchesDateRange = (startDate == null || flight.getDate().compareTo(startDate) >= 0) &&
+                    (endDate == null || flight.getDate().compareTo(endDate) <= 0);
+
+            if (matchesOrigin && matchesDestination && matchesDateRange) {
+                System.out.println(flight);
+            }
+        }
+    }
+
+    // Real-time status updates on incoming flights and flights ready for departure
+    public void startStatusUpdates() {
+        Timer timer = new Timer();
+        timer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                Random random = new Random();
+                for (Flight flight : flights) {
+                    int chance = random.nextInt(100);
+                    if (chance < 10) {
+                        flight.setStatus("Delayed");
+                    } else if (chance < 5) {
+                        flight.setStatus("Cancelled");
+                    } else {
+                        flight.setStatus("Scheduled");
+                    }
+                }
+                System.out.println("Flight statuses updated.");
+            }
+        }, 0, 60000); // Updates every minute
     }
 
     // Add a new flight
